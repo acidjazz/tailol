@@ -3,7 +3,7 @@ fs = require 'fs'
 files = []
 
 if process.argv.length < 3
-  console.log 'Usage: tailol files [file file...]'
+  console.log 'Usage: tailol file [file file...]'
   process.exit(0)
 
 for file, index in process.argv
@@ -58,6 +58,9 @@ files.forEach (file, i) ->
         focus: label: fg: 'white'
         border: fg: 'green'
         selected: fg: 'blue'
+
+  boxen[i].list.on 'focus', ->
+    boxen[i].list.setFront()
 
   boxen[i].list.key ['up', 'down'], ->
 
@@ -120,6 +123,7 @@ screen.key ['tab'], (ch, key) ->
     shiftIndex = false
     shiftBox = false
   screen.focusNext()
+  screen.render()
 
 screen.key ['S-tab'], (ch, key) ->
   if shiftBox isnt false
@@ -129,7 +133,9 @@ screen.key ['S-tab'], (ch, key) ->
     shiftValue = false
     shiftBox = false
   screen.focusPrevious()
+  screen.render()
 
 boxen[0].list.focus()
+boxen[0].list.setFront()
 screen.render()
 

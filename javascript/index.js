@@ -5,7 +5,7 @@ fs = require('fs');
 files = [];
 
 if (process.argv.length < 3) {
-  console.log('Usage: tailol files [file file...]');
+  console.log('Usage: tailol file [file file...]');
   process.exit(0);
 }
 
@@ -95,6 +95,9 @@ files.forEach(function(file, i) {
       }
     })
   });
+  boxen[i].list.on('focus', function() {
+    return boxen[i].list.setFront();
+  });
   boxen[i].list.key(['up', 'down'], function() {
     if (shiftIndex !== false && boxen[i].list.selected !== shiftIndex) {
       boxen[i].list.setItem(shiftIndex, shiftValue);
@@ -160,7 +163,8 @@ screen.key(['tab'], function(ch, key) {
     shiftIndex = false;
     shiftBox = false;
   }
-  return screen.focusNext();
+  screen.focusNext();
+  return screen.render();
 });
 
 screen.key(['S-tab'], function(ch, key) {
@@ -171,9 +175,12 @@ screen.key(['S-tab'], function(ch, key) {
     shiftValue = false;
     shiftBox = false;
   }
-  return screen.focusPrevious();
+  screen.focusPrevious();
+  return screen.render();
 });
 
 boxen[0].list.focus();
+
+boxen[0].list.setFront();
 
 screen.render();
