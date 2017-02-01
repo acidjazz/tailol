@@ -9,8 +9,16 @@
   "scripts": {
     "patch-release": "npm version patch && npm publish && git push --follow-tags"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/acidjazz/tailol.git"
+  },
+  "bugs": {
+    "url": "https://github.com/acidjazz/tailol/issues"
+  },
+  "homepage": "https://github.com/acidjazz/tailol#readme",
   "author": "",
-  "license": "ISC",
+  "license": "APACHE",
   "dependencies": {
     "blessed": "^0.1.81",
     "coffee-script": "^1.10.0",
