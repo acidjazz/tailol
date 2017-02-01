@@ -72,6 +72,27 @@ files.forEach (file, i) ->
       shiftValue = false
       shiftIndex = false
 
+  boxen[i].list.key '$', ->
+
+    if boxen[i].list.value.length > boxen[i].list.width
+      shift = boxen[i].list.value.length - boxen[i].list.width + 3
+      shiftIndex = boxen[i].list.selected
+      shiftValue = boxen[i].list.value if shiftValue is false
+      shiftBox = i
+      boxen[i].list.setItem boxen[i].list.selected, shiftValue.substring shift
+      screen.render()
+
+  boxen[i].list.key '^', ->
+
+    if boxen[i].list.value.length > boxen[i].list.width
+      shift = 0
+      shiftIndex = boxen[i].list.selected
+      shiftValue = boxen[i].list.value if shiftValue is false
+      shiftBox = i
+      boxen[i].list.setItem boxen[i].list.selected, shiftValue.substring shift
+      screen.render()
+
+
   boxen[i].list.key 'right', ->
 
     if boxen[i].list.value.length > boxen[i].list.width

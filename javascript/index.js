@@ -108,6 +108,30 @@ files.forEach(function(file, i) {
       return shiftIndex = false;
     }
   });
+  boxen[i].list.key('$', function() {
+    if (boxen[i].list.value.length > boxen[i].list.width) {
+      shift = boxen[i].list.value.length - boxen[i].list.width + 3;
+      shiftIndex = boxen[i].list.selected;
+      if (shiftValue === false) {
+        shiftValue = boxen[i].list.value;
+      }
+      shiftBox = i;
+      boxen[i].list.setItem(boxen[i].list.selected, shiftValue.substring(shift));
+      return screen.render();
+    }
+  });
+  boxen[i].list.key('^', function() {
+    if (boxen[i].list.value.length > boxen[i].list.width) {
+      shift = 0;
+      shiftIndex = boxen[i].list.selected;
+      if (shiftValue === false) {
+        shiftValue = boxen[i].list.value;
+      }
+      shiftBox = i;
+      boxen[i].list.setItem(boxen[i].list.selected, shiftValue.substring(shift));
+      return screen.render();
+    }
+  });
   boxen[i].list.key('right', function() {
     if (boxen[i].list.value.length > boxen[i].list.width) {
       shift++;
