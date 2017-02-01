@@ -6,6 +6,10 @@ if process.argv.length < 3
   console.log 'Usage: tailol file [file file...]'
   process.exit(0)
 
+if process.argv[2] is '-v'
+  console.log require('../package.json').version
+  process.exit(0)
+
 for file, index in process.argv
   continue if index < 2
   if !fs.existsSync file
@@ -18,17 +22,18 @@ blessed = require 'blessed'
 screen = blessed.screen smartCSR: true
 Tail = require('tail').Tail
 
+###
 util = require 'util'
 log_file = fs.createWriteStream('./debug.log', {flags : 'w'})
-
 log = (d) ->
   log_file.write util.format(d) + "\n"
-
+###
 
 screen.title = "tailoling #{files.length} files"
 
 boxen = []
 tails = []
+modal = false
 
 shift = 0
 shiftIndex = false
@@ -58,6 +63,33 @@ files.forEach (file, i) ->
         focus: label: fg: 'white'
         border: fg: 'green'
         selected: fg: 'blue'
+
+  boxen[i].list.on 'select', (selected) ->
+    modal = blessed.box
+      top: 'center'
+      left: '10%'
+      width: '80%'
+      height: '50%'
+      label: "#{selected.content.length} characters"
+      content: selected.content
+      tags: true
+      border: 'line'
+      draggable: true
+      style:
+        bg: '#333333'
+        border: fg: 'blue'
+      padding:
+        left: 2
+        top: 2
+        right: 2
+        bottom: 2
+
+    screen.append modal
+    modal.focus()
+    modal.setFront()
+
+    modal.key 'enter', ->
+      modal.destroy()
 
   boxen[i].list.on 'focus', ->
     boxen[i].list.setFront()

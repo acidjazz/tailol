@@ -1,4 +1,4 @@
-var Tail, blessed, boxen, file, files, fs, index, j, len, log, log_file, ref, screen, shift, shiftBox, shiftIndex, shiftValue, tails, util;
+var Tail, blessed, boxen, file, files, fs, index, j, len, modal, ref, screen, shift, shiftBox, shiftIndex, shiftValue, tails;
 
 fs = require('fs');
 
@@ -6,6 +6,11 @@ files = [];
 
 if (process.argv.length < 3) {
   console.log('Usage: tailol file [file file...]');
+  process.exit(0);
+}
+
+if (process.argv[2] === '-v') {
+  console.log(require('../package.json').version);
   process.exit(0);
 }
 
@@ -30,21 +35,21 @@ screen = blessed.screen({
 
 Tail = require('tail').Tail;
 
-util = require('util');
 
-log_file = fs.createWriteStream('./debug.log', {
-  flags: 'w'
-});
-
-log = function(d) {
-  return log_file.write(util.format(d) + "\n");
-};
+/*
+util = require 'util'
+log_file = fs.createWriteStream('./debug.log', {flags : 'w'})
+log = (d) ->
+  log_file.write util.format(d) + "\n"
+ */
 
 screen.title = "tailoling " + files.length + " files";
 
 boxen = [];
 
 tails = [];
+
+modal = false;
 
 shift = 0;
 
@@ -94,6 +99,37 @@ files.forEach(function(file, i) {
         }
       }
     })
+  });
+  boxen[i].list.on('select', function(selected) {
+    modal = blessed.box({
+      top: 'center',
+      left: '10%',
+      width: '80%',
+      height: '50%',
+      label: selected.content.length + " characters",
+      content: selected.content,
+      tags: true,
+      border: 'line',
+      draggable: true,
+      style: {
+        bg: '#333333',
+        border: {
+          fg: 'blue'
+        }
+      },
+      padding: {
+        left: 2,
+        top: 2,
+        right: 2,
+        bottom: 2
+      }
+    });
+    screen.append(modal);
+    modal.focus();
+    modal.setFront();
+    return modal.key('enter', function() {
+      return modal.destroy();
+    });
   });
   boxen[i].list.on('focus', function() {
     return boxen[i].list.setFront();
