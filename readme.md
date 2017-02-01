@@ -1,8 +1,8 @@
-![](media/tailol3.gif)
 tailol
 ========
-
 tail multiple files like a boss
+
+![](media/tailol3.gif)
 
 > *Hint* early development
 
