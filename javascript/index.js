@@ -1,4 +1,4 @@
-var Tail, blessed, boxen, file, files, fs, index, j, len, log, log_file, ref, screen, shift, tails, util;
+var Tail, blessed, boxen, file, files, fs, index, j, len, log, log_file, ref, screen, shift, shiftIndex, shiftValue, tails, util;
 
 fs = require('fs');
 
@@ -48,6 +48,10 @@ tails = [];
 
 shift = 0;
 
+shiftIndex = false;
+
+shiftValue = false;
+
 files.forEach(function(file, i) {
   var filename;
   filename = file.replace(/^.*[\\\/]/, '');
@@ -89,27 +93,42 @@ files.forEach(function(file, i) {
       }
     })
   });
-  boxen[i].list.key('up', function() {
-    boxen[i].current -= 1;
-    return shift = 0;
-  });
-  boxen[i].list.key('down', function() {
-    boxen[i].current += 1;
-    return shift = 0;
+  boxen[i].list.key(['up', 'down'], function() {
+    if (shiftIndex !== false && boxen[i].list.selected !== shiftIndex) {
+      boxen[i].list.setItem(shiftIndex, shiftValue);
+      screen.render();
+      shift = 0;
+      shiftValue = false;
+      return shiftIndex = false;
+    }
   });
   boxen[i].list.key('right', function() {
-    var value;
-    shift++;
-    value = boxen[i].list.value;
-    if (value.length > boxen[i].list.width) {
-      boxen[i].list.setItem(boxen[i].list.selected, boxen[i].list.value.substring(shift));
+    if (boxen[i].list.value.length > boxen[i].list.width) {
+      shift++;
+      shiftIndex = boxen[i].list.selected;
+      if (shiftValue === false) {
+        shiftValue = boxen[i].list.value;
+      }
+      boxen[i].list.setItem(boxen[i].list.selected, shiftValue.substring(shift));
+      return screen.render();
+    }
+  });
+  boxen[i].list.key('space', function() {
+    if (boxen[i].list.value.length > boxen[i].list.width) {
+      shift += 10;
+      shiftIndex = boxen[i].list.selected;
+      if (shiftValue === false) {
+        shiftValue = boxen[i].list.value;
+      }
+      boxen[i].list.setItem(boxen[i].list.selected, shiftValue.substring(shift));
       return screen.render();
     }
   });
   boxen[i].list.key('left', function() {
     if (shift > 0) {
       shift--;
-      return boxen[i].list.setItem(boxen[i].list.selected, boxen[i].list.value.substring(shift));
+      boxen[i].list.setItem(boxen[i].list.selected, shiftValue.substring(shift));
+      return screen.render();
     }
   });
   screen.append(boxen[i].list);

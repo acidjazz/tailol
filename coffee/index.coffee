@@ -31,6 +31,8 @@ boxen = []
 tails = []
 
 shift = 0
+shiftIndex = false
+shiftValue = false
 
 files.forEach (file, i) ->
 
@@ -56,30 +58,40 @@ files.forEach (file, i) ->
         border: fg: 'green'
         selected: fg: 'blue'
 
-  boxen[i].list.key 'up', ->
-    boxen[i].current -= 1
-    #log 'up found' + boxen[i].list.selected
-    shift = 0
-  boxen[i].list.key 'down', ->
-    boxen[i].current += 1
-    #log 'down found' + boxen[i].list.selected
-    shift = 0
+  boxen[i].list.key ['up', 'down'], ->
+
+    if shiftIndex isnt false and boxen[i].list.selected isnt shiftIndex
+      boxen[i].list.setItem shiftIndex, shiftValue
+      screen.render()
+      shift = 0
+      shiftValue = false
+      shiftIndex = false
 
   boxen[i].list.key 'right', ->
-    shift++
-    value = boxen[i].list.value
-    #boxen[i].list.add "#{value.length} vs #{boxen[i].list.width}"
-    if value.length > boxen[i].list.width
-      boxen[i].list.setItem boxen[i].list.selected, boxen[i].list.value.substring shift
-      #boxen[i].list.add boxen[i].list.value.substring 1
+
+    if boxen[i].list.value.length > boxen[i].list.width
+      shift++
+      shiftIndex = boxen[i].list.selected
+      shiftValue = boxen[i].list.value if shiftValue is false
+      boxen[i].list.setItem boxen[i].list.selected, shiftValue.substring shift
       screen.render()
-    #log 'right key pressed' + boxen[i].list.selected
+
+
+  boxen[i].list.key 'space', ->
+
+    if boxen[i].list.value.length > boxen[i].list.width
+      shift += 10
+      shiftIndex = boxen[i].list.selected
+      shiftValue = boxen[i].list.value if shiftValue is false
+      boxen[i].list.setItem boxen[i].list.selected, shiftValue.substring shift
+      screen.render()
+
 
   boxen[i].list.key 'left', ->
     if shift > 0
       shift--
-      boxen[i].list.setItem boxen[i].list.selected, boxen[i].list.value.substring shift
-    #log 'left key pressed ' + boxen[i].list.selected
+      boxen[i].list.setItem boxen[i].list.selected, shiftValue.substring shift
+      screen.render()
 
   screen.append boxen[i].list
 
