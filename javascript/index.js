@@ -1,4 +1,4 @@
-var Tail, blessed, boxen, file, files, fs, i, index, len, ref, screen, tails;
+var Tail, blessed, boxen, file, files, fs, index, j, len, log, log_file, ref, screen, shift, tails, util;
 
 fs = require('fs');
 
@@ -10,7 +10,7 @@ if (process.argv.length < 3) {
 }
 
 ref = process.argv;
-for (index = i = 0, len = ref.length; i < len; index = ++i) {
+for (index = j = 0, len = ref.length; j < len; index = ++j) {
   file = ref[index];
   if (index < 2) {
     continue;
@@ -22,8 +22,6 @@ for (index = i = 0, len = ref.length; i < len; index = ++i) {
   files.push(file);
 }
 
-console.log(files);
-
 blessed = require('blessed');
 
 screen = blessed.screen({
@@ -32,50 +30,95 @@ screen = blessed.screen({
 
 Tail = require('tail').Tail;
 
+util = require('util');
+
+log_file = fs.createWriteStream('./debug.log', {
+  flags: 'w'
+});
+
+log = function(d) {
+  return log_file.write(util.format(d) + "\n");
+};
+
 screen.title = "tailoling " + files.length + " files";
 
 boxen = [];
 
 tails = [];
 
-files.forEach(function(file, index) {
+shift = 0;
+
+files.forEach(function(file, i) {
   var filename;
   filename = file.replace(/^.*[\\\/]/, '');
-  boxen.push(blessed.List({
-    top: (100 / files.length * index) + '%',
-    height: 100 / files.length + '%',
-    label: filename,
-    border: {
-      type: 'line'
-    },
-    scrollable: true,
-    scrollbar: {
-      style: {
-        bg: 'blue'
-      }
-    },
-    alwaysScroll: true,
-    keys: true,
-    vi: true,
-    interactive: true,
-    style: {
-      label: {
-        fg: 'green'
-      },
+  boxen.push({
+    index: i,
+    current: false,
+    list: blessed.List({
+      top: (100 / files.length * i) + '%',
+      height: 100 / files.length + '%',
+      label: filename,
       border: {
-        fg: 'blue'
+        type: 'line'
       },
-      selected: {
-        fg: 'blue'
+      scrollable: true,
+      scrollbar: {
+        style: {
+          bg: 'blue'
+        }
+      },
+      alwaysScroll: true,
+      keys: true,
+      vi: true,
+      interactive: true,
+      style: {
+        label: {
+          fg: 'grey'
+        },
+        focus: {
+          label: {
+            fg: 'white'
+          }
+        },
+        border: {
+          fg: 'green'
+        },
+        selected: {
+          fg: 'blue'
+        }
       }
+    })
+  });
+  boxen[i].list.key('up', function() {
+    boxen[i].current -= 1;
+    return shift = 0;
+  });
+  boxen[i].list.key('down', function() {
+    boxen[i].current += 1;
+    return shift = 0;
+  });
+  boxen[i].list.key('right', function() {
+    var value;
+    shift++;
+    value = boxen[i].list.value;
+    if (value.length > boxen[i].list.width) {
+      boxen[i].list.setItem(boxen[i].list.selected, boxen[i].list.value.substring(shift));
+      return screen.render();
     }
-  }));
-  screen.append(boxen[index]);
+  });
+  boxen[i].list.key('left', function() {
+    if (shift > 0) {
+      shift--;
+      return boxen[i].list.setItem(boxen[i].list.selected, boxen[i].list.value.substring(shift));
+    }
+  });
+  screen.append(boxen[i].list);
   tails.push(new Tail(file));
-  return tails[index].on('line', function(data) {
-    boxen[index].add(data);
-    boxen[index].scrollTo(boxen[index].getScrollHeight());
-    boxen[index].select(boxen[index].items.length - 1);
+  return tails[i].on('line', function(data) {
+    boxen[i].list.add(data);
+    boxen[i].list.scrollTo(boxen[i].list.getScrollHeight());
+    boxen[i].list.select(boxen[i].list.items.length - 1);
+    boxen[i].current = boxen[i].list.items.length - 1;
     return screen.render();
   });
 });
@@ -91,5 +134,7 @@ screen.key(['tab'], function(ch, key) {
 screen.key(['S-tab'], function(ch, key) {
   return screen.focusPrevious();
 });
+
+boxen[0].list.focus();
 
 screen.render();
