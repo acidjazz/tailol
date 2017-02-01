@@ -33,6 +33,7 @@ tails = []
 shift = 0
 shiftIndex = false
 shiftValue = false
+shiftBox = false
 
 files.forEach (file, i) ->
 
@@ -64,6 +65,7 @@ files.forEach (file, i) ->
       boxen[i].list.setItem shiftIndex, shiftValue
       screen.render()
       shift = 0
+      shiftBox = false
       shiftValue = false
       shiftIndex = false
 
@@ -73,6 +75,7 @@ files.forEach (file, i) ->
       shift++
       shiftIndex = boxen[i].list.selected
       shiftValue = boxen[i].list.value if shiftValue is false
+      shiftBox = i
       boxen[i].list.setItem boxen[i].list.selected, shiftValue.substring shift
       screen.render()
 
@@ -83,6 +86,7 @@ files.forEach (file, i) ->
       shift += 10
       shiftIndex = boxen[i].list.selected
       shiftValue = boxen[i].list.value if shiftValue is false
+      shiftBox = i
       boxen[i].list.setItem boxen[i].list.selected, shiftValue.substring shift
       screen.render()
 
@@ -108,9 +112,22 @@ screen.key ['escape','q','C-c'], (ch, key) ->
   process.exit 0
 
 screen.key ['tab'], (ch, key) ->
+  if shiftBox isnt false
+    boxen[shiftBox].list.setItem shiftIndex, shiftValue
+    screen.render()
+    shift = 0
+    shiftValue = false
+    shiftIndex = false
+    shiftBox = false
   screen.focusNext()
 
 screen.key ['S-tab'], (ch, key) ->
+  if shiftBox isnt false
+    boxen[shiftBox].list.setItem shiftIndex, shiftValue
+    screen.render()
+    shift = 0
+    shiftValue = false
+    shiftBox = false
   screen.focusPrevious()
 
 boxen[0].list.focus()

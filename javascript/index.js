@@ -1,4 +1,4 @@
-var Tail, blessed, boxen, file, files, fs, index, j, len, log, log_file, ref, screen, shift, shiftIndex, shiftValue, tails, util;
+var Tail, blessed, boxen, file, files, fs, index, j, len, log, log_file, ref, screen, shift, shiftBox, shiftIndex, shiftValue, tails, util;
 
 fs = require('fs');
 
@@ -52,6 +52,8 @@ shiftIndex = false;
 
 shiftValue = false;
 
+shiftBox = false;
+
 files.forEach(function(file, i) {
   var filename;
   filename = file.replace(/^.*[\\\/]/, '');
@@ -98,6 +100,7 @@ files.forEach(function(file, i) {
       boxen[i].list.setItem(shiftIndex, shiftValue);
       screen.render();
       shift = 0;
+      shiftBox = false;
       shiftValue = false;
       return shiftIndex = false;
     }
@@ -109,6 +112,7 @@ files.forEach(function(file, i) {
       if (shiftValue === false) {
         shiftValue = boxen[i].list.value;
       }
+      shiftBox = i;
       boxen[i].list.setItem(boxen[i].list.selected, shiftValue.substring(shift));
       return screen.render();
     }
@@ -120,6 +124,7 @@ files.forEach(function(file, i) {
       if (shiftValue === false) {
         shiftValue = boxen[i].list.value;
       }
+      shiftBox = i;
       boxen[i].list.setItem(boxen[i].list.selected, shiftValue.substring(shift));
       return screen.render();
     }
@@ -147,10 +152,25 @@ screen.key(['escape', 'q', 'C-c'], function(ch, key) {
 });
 
 screen.key(['tab'], function(ch, key) {
+  if (shiftBox !== false) {
+    boxen[shiftBox].list.setItem(shiftIndex, shiftValue);
+    screen.render();
+    shift = 0;
+    shiftValue = false;
+    shiftIndex = false;
+    shiftBox = false;
+  }
   return screen.focusNext();
 });
 
 screen.key(['S-tab'], function(ch, key) {
+  if (shiftBox !== false) {
+    boxen[shiftBox].list.setItem(shiftIndex, shiftValue);
+    screen.render();
+    shift = 0;
+    shiftValue = false;
+    shiftBox = false;
+  }
   return screen.focusPrevious();
 });
 
