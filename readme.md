@@ -5,6 +5,9 @@ tail multiple files like a boss
 
 ![](media/tailol4.gif)
 
+[![npm version](https://badge.fury.io/js/tailol.svg)](https://badge.fury.io/js/tailol)
+[![GitHub issues](https://img.shields.io/github/issues/acidjazz/tailol.svg)](https://github.com/acidjazz/tailol/issues)
+
 ### installation
 ```
 npm install -g tailol
