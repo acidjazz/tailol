@@ -77,6 +77,20 @@ files.forEach (file, i) ->
         border: fg: 'green'
         selected: fg: 'blue'
 
+  boxen[i].list.key 'm', ->
+
+    if boxen[i].list.height is screen.height
+      boxen[i].list.top = (100 / files.length * i) + '%'
+      boxen[i].list.height = 100 / files.length + '%'
+      boxen[i].list.scrollTo boxen[i].list.getScrollHeight()
+    else
+      boxen[i].list.top = '0'
+      boxen[i].list.height = '100%'
+      boxen[i].list.scrollTo boxen[i].list.getScrollHeight()
+
+    screen.render()
+
+
   boxen[i].list.on 'select', (selected) ->
 
     if shift.index isnt false
@@ -112,6 +126,7 @@ files.forEach (file, i) ->
 
   boxen[i].list.on 'focus', ->
     boxen[i].list.setFront()
+
 
   boxen[i].list.key ['up', 'down'], ->
 

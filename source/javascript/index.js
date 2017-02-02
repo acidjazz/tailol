@@ -113,6 +113,18 @@ files.forEach(function(file, i) {
       }
     })
   });
+  boxen[i].list.key('m', function() {
+    if (boxen[i].list.height === screen.height) {
+      boxen[i].list.top = (100 / files.length * i) + '%';
+      boxen[i].list.height = 100 / files.length + '%';
+      boxen[i].list.scrollTo(boxen[i].list.getScrollHeight());
+    } else {
+      boxen[i].list.top = '0';
+      boxen[i].list.height = '100%';
+      boxen[i].list.scrollTo(boxen[i].list.getScrollHeight());
+    }
+    return screen.render();
+  });
   boxen[i].list.on('select', function(selected) {
     if (shift.index !== false) {
       boxen[i].list.setItem(shift.index, shift.value);
