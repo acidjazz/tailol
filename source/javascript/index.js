@@ -1,4 +1,4 @@
-var Tail, blessed, boxen, file, files, fs, index, j, len, modal, ref, screen, shift, shiftBox, shiftIndex, shiftValue, tails;
+var Tail, blessed, boxen, file, files, fs, index, j, len, modal, ref, screen, shift, tails;
 
 fs = require('fs');
 
@@ -51,13 +51,18 @@ tails = [];
 
 modal = false;
 
-shift = 0;
-
-shiftIndex = false;
-
-shiftValue = false;
-
-shiftBox = false;
+shift = {
+  cursor: 0,
+  index: false,
+  value: false,
+  box: false,
+  reset: function() {
+    this.cursor = 0;
+    this.index = false;
+    this.value = false;
+    return this.box = false;
+  }
+};
 
 files.forEach(function(file, i) {
   var filename;
@@ -65,6 +70,14 @@ files.forEach(function(file, i) {
   boxen.push({
     index: i,
     current: false,
+    shift: function(i) {
+      shift.index = this.list.selected;
+      if (shift.value === false) {
+        shift.value = this.list.value;
+      }
+      shift.box = i;
+      return this.list.setItem(this.list.selected, shift.value.substring(shift.cursor));
+    },
     list: blessed.List({
       top: (100 / files.length * i) + '%',
       height: 100 / files.length + '%',
@@ -101,6 +114,11 @@ files.forEach(function(file, i) {
     })
   });
   boxen[i].list.on('select', function(selected) {
+    if (shift.index !== false) {
+      boxen[i].list.setItem(shift.index, shift.value);
+      screen.render();
+      shift.reset();
+    }
     modal = blessed.box({
       top: 'center',
       left: '10%',
@@ -135,67 +153,44 @@ files.forEach(function(file, i) {
     return boxen[i].list.setFront();
   });
   boxen[i].list.key(['up', 'down'], function() {
-    if (shiftIndex !== false && boxen[i].list.selected !== shiftIndex) {
-      boxen[i].list.setItem(shiftIndex, shiftValue);
+    if (shift.index !== false && boxen[i].list.selected !== shift.index) {
+      boxen[i].list.setItem(shift.index, shift.value);
       screen.render();
-      shift = 0;
-      shiftBox = false;
-      shiftValue = false;
-      return shiftIndex = false;
+      return shift.reset();
     }
   });
   boxen[i].list.key('$', function() {
     if (boxen[i].list.value.length > boxen[i].list.width) {
-      shift = boxen[i].list.value.length - boxen[i].list.width + 3;
-      shiftIndex = boxen[i].list.selected;
-      if (shiftValue === false) {
-        shiftValue = boxen[i].list.value;
-      }
-      shiftBox = i;
-      boxen[i].list.setItem(boxen[i].list.selected, shiftValue.substring(shift));
+      shift.cursor = boxen[i].list.value.length - boxen[i].list.width + 3;
+      boxen[i].shift(i);
       return screen.render();
     }
   });
   boxen[i].list.key('^', function() {
     if (boxen[i].list.value.length > boxen[i].list.width) {
-      shift = 0;
-      shiftIndex = boxen[i].list.selected;
-      if (shiftValue === false) {
-        shiftValue = boxen[i].list.value;
-      }
-      shiftBox = i;
-      boxen[i].list.setItem(boxen[i].list.selected, shiftValue.substring(shift));
+      shift.cursor = 0;
+      boxen[i].shift(i);
       return screen.render();
     }
   });
   boxen[i].list.key('right', function() {
     if (boxen[i].list.value.length > boxen[i].list.width) {
-      shift++;
-      shiftIndex = boxen[i].list.selected;
-      if (shiftValue === false) {
-        shiftValue = boxen[i].list.value;
-      }
-      shiftBox = i;
-      boxen[i].list.setItem(boxen[i].list.selected, shiftValue.substring(shift));
+      shift.cursor++;
+      boxen[i].shift(i);
       return screen.render();
     }
   });
   boxen[i].list.key('space', function() {
     if (boxen[i].list.value.length > boxen[i].list.width) {
-      shift += 10;
-      shiftIndex = boxen[i].list.selected;
-      if (shiftValue === false) {
-        shiftValue = boxen[i].list.value;
-      }
-      shiftBox = i;
-      boxen[i].list.setItem(boxen[i].list.selected, shiftValue.substring(shift));
+      shift.cursor += 10;
+      boxen[i].shift(i);
       return screen.render();
     }
   });
   boxen[i].list.key('left', function() {
-    if (shift > 0) {
-      shift--;
-      boxen[i].list.setItem(boxen[i].list.selected, shiftValue.substring(shift));
+    if (shift.cursor > 0) {
+      shift.cursor--;
+      boxen[i].shift(i);
       return screen.render();
     }
   });
@@ -215,25 +210,20 @@ screen.key(['escape', 'q', 'C-c'], function(ch, key) {
 });
 
 screen.key(['tab'], function(ch, key) {
-  if (shiftBox !== false) {
-    boxen[shiftBox].list.setItem(shiftIndex, shiftValue);
+  if (shift.box !== false) {
+    boxen[shift.box].list.setItem(shift.index, shift.value);
     screen.render();
-    shift = 0;
-    shiftValue = false;
-    shiftIndex = false;
-    shiftBox = false;
+    shift.reset();
   }
   screen.focusNext();
   return screen.render();
 });
 
 screen.key(['S-tab'], function(ch, key) {
-  if (shiftBox !== false) {
-    boxen[shiftBox].list.setItem(shiftIndex, shiftValue);
+  if (shift.box !== false) {
+    boxen[shift.box].list.setItem(shift.index, shift.value);
     screen.render();
-    shift = 0;
-    shiftValue = false;
-    shiftBox = false;
+    shift.reset();
   }
   screen.focusPrevious();
   return screen.render();

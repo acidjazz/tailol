@@ -35,10 +35,16 @@ boxen = []
 tails = []
 modal = false
 
-shift = 0
-shiftIndex = false
-shiftValue = false
-shiftBox = false
+shift =
+  cursor: 0
+  index: false
+  value: false
+  box: false
+  reset: ->
+    @cursor = 0
+    @index = false
+    @value = false
+    @box = false
 
 files.forEach (file, i) ->
 
@@ -47,6 +53,13 @@ files.forEach (file, i) ->
   boxen.push
     index: i
     current: false
+    shift: (i) ->
+      
+      shift.index = @list.selected
+      shift.value = @list.value if shift.value is false
+      shift.box = i
+      @list.setItem @list.selected, shift.value.substring shift.cursor
+
     list: blessed.List
       top: (100 / files.length * i) + '%'
       height: 100 / files.length + '%'
@@ -65,6 +78,12 @@ files.forEach (file, i) ->
         selected: fg: 'blue'
 
   boxen[i].list.on 'select', (selected) ->
+
+    if shift.index isnt false
+      boxen[i].list.setItem shift.index, shift.value
+      screen.render()
+      shift.reset()
+
     modal = blessed.box
       top: 'center'
       left: '10%'
@@ -96,61 +115,45 @@ files.forEach (file, i) ->
 
   boxen[i].list.key ['up', 'down'], ->
 
-    if shiftIndex isnt false and boxen[i].list.selected isnt shiftIndex
-      boxen[i].list.setItem shiftIndex, shiftValue
+    if shift.index isnt false and boxen[i].list.selected isnt shift.index
+      boxen[i].list.setItem shift.index, shift.value
       screen.render()
-      shift = 0
-      shiftBox = false
-      shiftValue = false
-      shiftIndex = false
+      shift.reset()
 
   boxen[i].list.key '$', ->
 
     if boxen[i].list.value.length > boxen[i].list.width
-      shift = boxen[i].list.value.length - boxen[i].list.width + 3
-      shiftIndex = boxen[i].list.selected
-      shiftValue = boxen[i].list.value if shiftValue is false
-      shiftBox = i
-      boxen[i].list.setItem boxen[i].list.selected, shiftValue.substring shift
+      shift.cursor = boxen[i].list.value.length - boxen[i].list.width + 3
+      boxen[i].shift i
       screen.render()
 
   boxen[i].list.key '^', ->
 
     if boxen[i].list.value.length > boxen[i].list.width
-      shift = 0
-      shiftIndex = boxen[i].list.selected
-      shiftValue = boxen[i].list.value if shiftValue is false
-      shiftBox = i
-      boxen[i].list.setItem boxen[i].list.selected, shiftValue.substring shift
+      shift.cursor = 0
+      boxen[i].shift i
       screen.render()
-
 
   boxen[i].list.key 'right', ->
 
     if boxen[i].list.value.length > boxen[i].list.width
-      shift++
-      shiftIndex = boxen[i].list.selected
-      shiftValue = boxen[i].list.value if shiftValue is false
-      shiftBox = i
-      boxen[i].list.setItem boxen[i].list.selected, shiftValue.substring shift
+      shift.cursor++
+      boxen[i].shift i
       screen.render()
 
 
   boxen[i].list.key 'space', ->
 
     if boxen[i].list.value.length > boxen[i].list.width
-      shift += 10
-      shiftIndex = boxen[i].list.selected
-      shiftValue = boxen[i].list.value if shiftValue is false
-      shiftBox = i
-      boxen[i].list.setItem boxen[i].list.selected, shiftValue.substring shift
+      shift.cursor += 10
+      boxen[i].shift i
       screen.render()
 
 
   boxen[i].list.key 'left', ->
-    if shift > 0
-      shift--
-      boxen[i].list.setItem boxen[i].list.selected, shiftValue.substring shift
+    if shift.cursor > 0
+      shift.cursor--
+      boxen[i].shift i
       screen.render()
 
   screen.append boxen[i].list
@@ -168,23 +171,18 @@ screen.key ['escape','q','C-c'], (ch, key) ->
   process.exit 0
 
 screen.key ['tab'], (ch, key) ->
-  if shiftBox isnt false
-    boxen[shiftBox].list.setItem shiftIndex, shiftValue
+  if shift.box isnt false
+    boxen[shift.box].list.setItem shift.index, shift.value
     screen.render()
-    shift = 0
-    shiftValue = false
-    shiftIndex = false
-    shiftBox = false
+    shift.reset()
   screen.focusNext()
   screen.render()
 
 screen.key ['S-tab'], (ch, key) ->
-  if shiftBox isnt false
-    boxen[shiftBox].list.setItem shiftIndex, shiftValue
+  if shift.box isnt false
+    boxen[shift.box].list.setItem shift.index, shift.value
     screen.render()
-    shift = 0
-    shiftValue = false
-    shiftBox = false
+    shift.reset()
   screen.focusPrevious()
   screen.render()
 

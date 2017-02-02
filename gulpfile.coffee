@@ -5,7 +5,7 @@ fs           = require 'fs'
 concat       = require 'gulp-concat'
 
 gulp.task 'coffee', ->
-  gulp.src('./coffee/*.coffee')
+  gulp.src('./source/coffee/*.coffee')
     .pipe(coffee(bare: true)
       .on('error', notify.onError((error) ->
         title: "Coffee error"
@@ -13,10 +13,10 @@ gulp.task 'coffee', ->
         sound: 'Pop'
       )))
     .pipe(concat('index.js'))
-    .pipe(gulp.dest('./javascript'))
+    .pipe(gulp.dest('./source/javascript'))
 
 watch = ->
-  gulp.watch ['./coffee/*.coffee'], ['coffee']
+  gulp.watch ['./source/coffee/*.coffee'], ['coffee']
 
 gulp.task 'watch', watch
 gulp.task 'default', ['coffee']

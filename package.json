@@ -2,7 +2,7 @@
   "name": "tailol",
   "version": "1.0.7",
   "description": "tail multiple files like a boss",
-  "main": "javascript/index.js",
+  "main": "source/javascript/index.js",
   "bin": {
     "tailol": "./bin/tailol.js"
   },
