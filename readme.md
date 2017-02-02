@@ -15,6 +15,7 @@ npm install -g tailol
 ```
 ### keyboard commands 
 
+* `ENTER` key shows the line in its entirety in its own window
 * `TAB` key cycles each log window
 * `UP` and `DOWN` arrow keys highlight each line
 * `LEFT` and `RIGHT` arrow keys scroll lines that are too long
