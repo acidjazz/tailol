@@ -1,6 +1,6 @@
 {
   "name": "tailol",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "tail multiple files at once",
   "main": "source/javascript/index.js",
   "bin": {
